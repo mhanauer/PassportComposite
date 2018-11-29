@@ -18,7 +18,7 @@ Look at normality and see if transforms are necs
 
 Check missing data: No missing data
 
-Create composite score
+Create composite score: Need to add one to for phram costs variable, because you cannot take the log of zero
 
 Order by highest scores
 ```{r}
@@ -46,10 +46,37 @@ InfoCompositeComplete$PharmCost= gsub("\\D", "", InfoCompositeComplete$PharmCost
 InfoCompositeComplete$PPTotalPaid = gsub("\\D", "", InfoCompositeComplete$PPTotalPaid)
 write.csv(InfoCompositeComplete, "InfoCompositeComplete.csv", row.names = FALSE)
 InfoCompositeComplete = read.csv("InfoCompositeComplete.csv", header = TRUE)
-### Looking at PharmCost)
+### Looking at PharmCost) log makes sense
 hist(InfoCompositeComplete$PharmCost)
 qqnorm(InfoCompositeComplete$PharmCost)
 hist(log(InfoCompositeComplete$PharmCost))
+
+InfoCompositeComplete$PharmCost = InfoCompositeComplete$PharmCost+1
+### Looking at PPTotalPaid log make sense
+hist(InfoCompositeComplete$PPTotalPaid)
+qqnorm(InfoCompositeComplete$PPTotalPaid)
+hist(log(InfoCompositeComplete$PPTotalPaid))
+qqnorm(log(InfoCompositeComplete$PPTotalPaid))
+
+### Create the data set 
+InfoCompositeCompleteOutcome = data.frame(MissedVisits = scale(log(InfoCompositeComplete$MissedVisits)), NumServices = scale(log(InfoCompositeComplete$NumServices)), PharmCost = scale(log(InfoCompositeComplete$PharmCost)), PPTotalPaid = scale(log(InfoCompositeComplete$PPTotalPaid)))
+head(InfoCompositeCompleteOutcome)
+
+
+Outcome = rowMeans(InfoCompositeCompleteOutcome)
+describe(Outcome)
+
+
+hist(Outcome)
+
+InfoComposite = data.frame(InfoCompositeComplete, Outcome)
+
+
+
+InfoComposite = InfoComposite[order(-Outcome),]
+head(InfoComposite)
+write.csv(InfoComposite, "InfoComposite.csv", row.names = FALSE)
+
 ```
 
 
